@@ -1,0 +1,26 @@
+{% extends "base/template.html" %}
+
+{% block navbar %}
+{%  include "samba/nav/samba_nav.html" %}
+{% endblock %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+
+     {% if success %}
+       {% include "samba/nav/alert_ok.html" %}
+     {% else %}
+       {% include "samba/nav/alert_nok.html" %}
+     {% endif %}
+
+      <form method="post" action="{% url "add_group" %}">{% csrf_token %}
+        {{ form.as_table }}
+        <button type="submit" class="btn btn-default">Save</button>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

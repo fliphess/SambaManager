@@ -1,2 +1,3 @@
-django==1.2
-pexpect
+Django==1.6.5
+pexpect==3.3
+wsgiref==0.1.2

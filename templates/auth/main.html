@@ -1,0 +1,25 @@
+{% extends "base/template.html" %}
+
+{% block body %}
+
+{% if user.is_authenticated %}
+  {% include "base/nav/navbar.html" %}
+{% else %}
+  {% include "auth/basic_nav.html" %}
+{% endif %}
+
+<div class="row">
+    <div class="span12">
+        <div class="hero-unit center">
+          <center>
+            {% if user.is_authenticated %}
+              <h3>You are logged in as user {{ user.username }}.</h3>
+            {% else %}
+              <a href="{% url "start" %}"><h1>{{ text }}.</h1></a>
+            {% endif %}
+          </center>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

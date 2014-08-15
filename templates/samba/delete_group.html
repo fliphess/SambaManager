@@ -1,0 +1,23 @@
+{% extends "base/template.html" %}
+
+{% block navbar %}
+{%  include "samba/nav/samba_nav.html" %}
+{% endblock %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+
+      <form action="{% url "delete_group" group.pk %}" method="post">{% csrf_token %}
+        <h2>Are you sure you want to delete {{ group.name }}?</h2>
+        <label>No <input type="radio" name="delete" value="0" checked="checked" /></label>
+        <label>Yes <input type="radio" name="delete" value="1" /></label>
+        <br>
+        <input type="submit" value="Submit" />
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

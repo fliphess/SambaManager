@@ -1,0 +1,26 @@
+{% extends "base/template.html" %}
+
+{% block navbar %}
+{%  include "samba/nav/samba_nav.html" %}
+{% endblock %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+
+   {% if success %}
+     {% include "samba/nav/alert_ok.html" %}
+   {% else %}
+     {% include "samba/nav/alert_nok.html" %}
+   {% endif %}
+
+   <form method="post" action="{% url "add_share" %}">{% csrf_token %}
+     <table>
+       {{ form.as_table }}
+       <tr><td colspan="2"><button type="submit" class="btn btn-default">Save</button></td></tr>
+     </table>
+   </form>
+
+  </div>
+</div>
+{% endblock %}

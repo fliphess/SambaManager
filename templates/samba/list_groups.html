@@ -1,0 +1,35 @@
+{% extends "base/template.html" %}
+
+{% block navbar %}
+{%  include "samba/nav/samba_nav.html" %}
+{% endblock %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+    {% if groups.count %}
+     <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      {% for group in groups %}
+      <tbody>
+        <tr>
+          <td>{{ group }}</td>
+          <td><a href="{% url "delete_group" group.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </tr>
+      </tbody>
+      {% endfor %}
+    </table>
+    <br/>
+    {% endif %}
+    <a class="btn btn-default" href="{% url "add_group" %}" role="button">Add Group</a>
+    </div>
+  </div>
+ </div>
+
+{% endblock %}
