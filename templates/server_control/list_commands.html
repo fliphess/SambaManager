@@ -1,0 +1,40 @@
+{% extends "base/template.html" %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+      {% if users.count %}
+     <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Enabled</th>
+            <th>Name</th>
+            <th>Command</th>
+            <th>Title</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        {% for command in commands %}
+        <tbody>
+          <tr>
+            <td>{{ command.enabled }}</td>
+            <td>{{ command.name }}</td>
+            <td>{{ command.command }}</td>
+            <td>{{ command.title }}</td>
+            <td><a href="{% url "edit_command" command.name %}" class="btn btn-warning btn-sm">Edit</a>
+            <td><a href="{% url "delete_command" command.name %}" class="btn btn-danger btn-sm">Delete</a>
+          </tr>
+        </tbody>
+        {% endfor %}
+      </table>
+      <br/>
+      {% endif %}
+      <a class="btn btn-default" href="{% url "add_command" %}" role="button">Add Command</a>
+      <a class="btn btn-default" href="{% url "list_commands" %}" role="button">Edit Commands</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

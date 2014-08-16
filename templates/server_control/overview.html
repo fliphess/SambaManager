@@ -1,0 +1,13 @@
+{% extends "base/template.html" %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+      <a class="btn btn-default" href="{% url "add_command" %}" role="button">Add Command</a>
+      <a class="btn btn-default" href="{% url "list_commands" %}" role="button">List Commands</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

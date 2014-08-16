@@ -9,9 +9,9 @@
   <div class="container">
 
    {% if success %}
-     {% include "samba_manager/nav/alert_ok.html" %}
+     {% include "base/alert/alert_ok.html" %}
    {% else %}
-     {% include "samba_manager/nav/alert_nok.html" %}
+     {% include "base/alert/alert_nok.html" %}
    {% endif %}
 
    <form method="post" action="{% url "add_share" %}">{% csrf_token %}
