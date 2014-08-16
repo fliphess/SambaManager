@@ -9,7 +9,7 @@
   <div class="container">
     <div class="hero-unit center">
 
-
+        {% include "base/alert/alert.html" %}
 
         <form action="{% url "delete_user" user.pk %}" method="post">{% csrf_token %}
             <h2>Are you sure you want to delete {{ user.name }}?</h2>

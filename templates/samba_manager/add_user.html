@@ -8,11 +8,7 @@
  <div class="row">
   <div class="container">
 
-    {% if success %}
-      {% include "base/alert/alert_ok.html" %}
-    {% else %}
-      {% include "base/alert/alert_nok.html" %}
-    {% endif %}
+    {% include "base/alert/alert.html" %}
 
     <form action="{% url "add_user" %}" method="post">{% csrf_token %}
       <table>

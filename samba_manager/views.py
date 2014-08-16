@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
 from django.db import transaction
 from django.http import HttpResponseRedirect
+from control.status import Status
 
 from samba_manager import utils
 from samba_manager.models import ManageableUser, ManageableGroup, ManageableShare
@@ -36,8 +37,8 @@ def list_shares(request):
 @transaction.atomic()
 @login_required(login_url='/login/')
 def add_user(request):
-    message = 'Fill in all fields to add a user'
-    success = True
+    status = Status()
+    status.set(message='Fill in all fields to add a user', success=True)
 
     if request.method == 'POST':
         form = AddChangePasswordForm(request.POST)
@@ -48,21 +49,22 @@ def add_user(request):
             groups = form.clean()['groups']
 
             if ManageableUser.objects.filter(name=name) or name in settings.USERS:
-                message = 'User already exists'
-                success = False
-
+                status.set(message='User already exists', success=False)
             else:
                 if pass1 == pass2:
                     utils.add_user(name, pass1)
                     utils.set_user_groups(name, groups)
-                    message = 'User added'
-                    success = True
+                    status.set(message='User added', success=True)
                 else:
-                    message = 'Passwords do not match.'
-                    success = False
-    else:
-        form = AddChangePasswordForm()
-    return render(request, 'samba_manager/add_user.html', {'form': form, 'message': message, 'success': success})
+                    status.set(message='Passwords do not match.', success=False)
+        else:
+            status.set(message='Invalid input', success=False)
+
+        status.add(item={"users": ManageableUser.objects.all())
+        return render(request, 'samba_manager/list_users.html', status.get())
+
+    status.add(item={"form": AddChangePasswordForm()})
+    return render(request, 'samba_manager/add_user.html', status.get())
 
 
 @transaction.atomic()

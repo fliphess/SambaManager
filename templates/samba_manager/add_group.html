@@ -9,11 +9,7 @@
   <div class="container">
     <div class="hero-unit center">
 
-     {% if success %}
-       {% include "base/alert/alert_ok.html" %}
-     {% else %}
-       {% include "base/alert/alert_nok.html" %}
-     {% endif %}
+     {% include "base/alert/alert.html" %}
 
       <form method="post" action="{% url "add_group" %}">{% csrf_token %}
         {{ form.as_table }}

@@ -9,6 +9,8 @@
   <div class="container">
     <div class="hero-unit center">
 
+       {% include "base/alert/alert.html" %}
+
         <form action="{% url "edit_user" user.pk %}" method="post">{% csrf_token %}
           <table>
             {{ form.as_table }}

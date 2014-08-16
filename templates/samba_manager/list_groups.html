@@ -9,11 +9,7 @@
   <div class="container">
     <div class="hero-unit center">
 
-    {% if success == True %}
-      {% include "base/alert/alert_ok.html" %}
-    {% elif succcess == False %}
-      {% include "base/alert/alert_nok.html" %}
-    {% endif %}
+    {% include "base/alert/alert.html" %}
 
     {% if groups.count %}
      <table class="table table-hover">

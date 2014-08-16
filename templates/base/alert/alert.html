@@ -1,0 +1,5 @@
+{% if success == True %}
+  {% include "base/alert/alert_ok.html" %}
+{% elif success == False %}
+  {% include "base/alert/alert_nok.html" %}
+{% endif %}
