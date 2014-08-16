@@ -41,3 +41,7 @@ SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 * Use django bootstrap for forms
 * Replace pam module with sudo 
 * Refactor utils to use sudo approved external executor that checks the database is the command is present in models
+
+## LONGTERM TODO
+* replace user configuration with LDAP
+* Add LDAP admin panel

@@ -1,12 +1,16 @@
 {% extends "base/template.html" %}
 
+{% block navbar %}
+{%  include "server_manager/nav/server_manager_nav.html" %}
+{% endblock %}
+
 {% block content %}
  <div class="row">
   <div class="container">
 
-    {% if success %}
+    {% if success == True %}
       {% include "base/alert/alert_ok.html" %}
-    {% else %}
+    {% elif success == False %}
       {% include "base/alert/alert_nok.html" %}
     {% endif %}
 

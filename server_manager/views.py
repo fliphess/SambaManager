@@ -7,15 +7,15 @@ from server_manager.models import ServerCommand
 
 
 @login_required(login_url="/login/")
-def overview(request):
+def command_overview(request):
     commands = ServerCommand.objects.all()
-    return render(request, "server_manager/overview.html", {"commands": commands})
+    return render(request, "server_manager/command_overview.html", {"commands": commands})
 
 
 @login_required(login_url="/login/")
-def list_commands(request):
+def command_editor(request):
     commands = ServerCommand.objects.all()
-    return render(request, "server_manager/list_commands.html", {"commands": commands})
+    return render(request, "server_manager/command_editor.html", {"commands": commands})
 
 
 @transaction.atomic()
@@ -28,7 +28,8 @@ def add_command(request):
         form = ServerCommandForm(request.POST)
 
         if form.is_valid():
-            enabled = form.clean()["enabled"]
+            visible = form.clean()["visible"]
+            sudo = form.clean()["sudo"]
             name = form.clean()["name"]
             command = form.clean()["command"]
             title = form.clean()["title"]
@@ -36,10 +37,10 @@ def add_command(request):
             if ServerCommand.objects.filter(name=name):
                 status.set(message="Command already exists", success=False)
             else:
-                ServerCommand.objects.create(name=name, enabled=enabled, command=command, title=title)
+                ServerCommand.objects.create(name=name, visible=visible, sudo=sudo, command=command, title=title)
                 status.set(message="Command added", success=True)
                 status.add(item={"commands": ServerCommand.objects.all()})
-                return render(request, "server_manager/list_commands.html", status.get())
+                return render(request, "server_manager/command_editor.html", status.get())
         else:
             status.set(message='Invalid input', success=False)
 
@@ -53,7 +54,7 @@ def edit_command(request, name):
     command = get_object_or_404(ServerCommand, name=name)
 
     initial = {
-        "enabled": command.enabled,
+        "visible": command.visible,
         "sudo": command.sudo,
         "name": command.name,
         "command": command.command,
@@ -66,7 +67,7 @@ def edit_command(request, name):
     if request.method == "POST":
         form = ServerCommandForm(request.POST)
         if form.is_valid():
-            command.enabled = form.clean()["enabled"]
+            command.visible = form.clean()["visible"]
             command.sudo = form.clean()["sudo"]
             command.name = form.clean()["name"]
             command.command = form.clean()["command"]
@@ -75,7 +76,7 @@ def edit_command(request, name):
 
             status.set(success=True, message="Command updated")
             status.add(item={"commands": ServerCommand.objects.all()})
-            return render(request, "server_manager/list_commands.html", status.get())
+            return render(request, "server_manager/command_editor.html", status.get())
 
         else:
             status.set(success=False, message='Invalid input')
@@ -99,5 +100,5 @@ def delete_command(request, name):
             status.set(success=False, message="Deletion of command %s canceled" % command.name)
 
         status.add(item={"commands": ServerCommand.objects.all()})
-        return render(request, "server_manager/list_commands.html", status.get())
+        return render(request, "server_manager/command_editor.html", status.get())
     return render(request, "server_manager/delete_command.html", status.get())

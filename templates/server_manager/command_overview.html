@@ -1,0 +1,29 @@
+{% extends "base/template.html" %}
+
+{% block navbar %}
+{%  include "server_manager/nav/server_manager_nav.html" %}
+{% endblock %}
+
+{% block content %}
+
+{% if success == True %}
+  {% include "base/alert/alert_ok.html" %}
+{% elif success == False %}
+  {% include "base/alert/alert_nok.html" %}
+{% endif %}
+
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+
+      {% for command in commands %}
+        {% if command.visible == True %}
+            {% include "server_manager/nav/modal.html" %}
+        {% endif %}
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

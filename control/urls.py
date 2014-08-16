@@ -6,6 +6,8 @@ urlpatterns = patterns(
     '',
     url(r'^$', 'control.views.auth.main', name='main'),
     url(r'^start/$', 'control.views.base.start', name='start'),
+    url(r'^run_command/(?P<name>\w+)/$', 'control.views.base.run_command', name='run_command'),
+
 
     url(r'^samba_manager/', include('samba_manager.urls')),
     url(r'^server_manager/', include('server_manager.urls')),
