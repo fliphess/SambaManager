@@ -26,8 +26,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'samba_manager.urls'
-WSGI_APPLICATION = 'samba_manager.wsgi.application'
+ROOT_URLCONF = 'control.urls'
+WSGI_APPLICATION = 'control.wsgi.application'
 
 
 # Database
@@ -61,7 +61,7 @@ STATICFILES_DIRS = (
 )
 
 ROOT_PASSWORD = ''
-SAMBA_CONF = '/etc/samba_manager/smb.conf'
+SAMBA_CONF = '/etc/samba/smb.conf'
 USER_HOME_DIR = '/home/{0}'
 SAMBA_SHARES_DIR = '/srv/{0}'
 

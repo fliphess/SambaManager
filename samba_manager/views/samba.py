@@ -12,7 +12,7 @@ from samba_manager.forms import AddChangePasswordForm, GroupForm, UserOnlyForm, 
 
 @login_required(login_url='/login/')
 def index(request):
-    return render(request, 'samba_manager/base.html', {'text': 'Samba'})
+    return render(request, 'samba_manager/base.html', {'text': 'This should become some wild overview page with statistics and logs and events and messages but for now all you got is this lousy empty page'})
 
 
 @login_required(login_url='/login/')
