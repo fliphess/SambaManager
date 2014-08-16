@@ -153,6 +153,7 @@ def edit_share(request, id):
         form = SambaShareForm(request.POST)
         if form.is_valid():
             utils.add_change_samba_share(form.clean())
+
             status.set(message="Shared updated", success=True)
             status.add(item={"shares": ManageableShare.objects.all()})
             return render(request, "samba_manager/list_shares.html", status.get())
@@ -160,6 +161,7 @@ def edit_share(request, id):
             status.set(message="Invalid input", success=True)
 
     groups = map(lambda x: x.lstrip('@'), share_conf.get(share.name, 'valid users').split(' '))
+
 
     status.add(item={"groups": groups, "share": share})
     status.add(item={"form": SambaShareForm(
@@ -169,7 +171,7 @@ def edit_share(request, id):
             'allowed_groups': groups,
         })
     })
-    return render(request, 'samba_manager/add_share.html', status.get())
+    return render(request, 'samba_manager/edit_share.html', status.get())
 
 
 @transaction.atomic()
