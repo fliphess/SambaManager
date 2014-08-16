@@ -1,0 +1,11 @@
+{% extends "base/template.html" %}
+
+{% block content %}
+ <div class="row">
+  <div class="container">
+    <div class="hero-unit center">
+            <a href="{% url "start" %}"><center><h1>{{ text }}.</h1></center></a>
+        </div>
+    </div>
+</div>
+{% endblock %}
