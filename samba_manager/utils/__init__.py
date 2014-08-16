@@ -239,7 +239,7 @@ def add_change_samba_share(confs):
         conf.set(name, 'vfs objects', 'recycle')
     conf.set(name, 'path', path)
     conf.set(name, 'comment', comment)
-    conf.set(name, 'valid users', ' '.join(map(lambda x: '@' + x, groups)))
+    conf.set(name, 'valid users', ' '.join(map(lambda x: '@' + x, [x.name for x in groups])))
     _save_samba_share(conf)
     return True
 

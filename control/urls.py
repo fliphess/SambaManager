@@ -8,6 +8,7 @@ urlpatterns = patterns(
     url(r'^start/$', 'control.views.base.start', name='start'),
 
     url(r'^samba_manager/', include('samba_manager.urls')),
+    url(r'^server_manager/', include('server_manager.urls')),
 
     url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'auth/login.html'}, name='login'),
     url(r'^logout/$', 'control.views.auth.logout_view', name='logout'),

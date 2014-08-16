@@ -15,7 +15,7 @@ USER_HOME_DIR = '/storage/arquivos/home/{0}'
 SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 ```
 
-## initial commit 2014
+## Done
 * Port to current django version
 * Setup a basic twitter bootstrap skeleton
 * Translated all templates to english
@@ -25,10 +25,19 @@ SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 ## TODO:
 
 * write unit tests
+
+* write samba config file function
+* sync users option: Sync users in database with users on the system
+* fix no section exception (section not present in samba file) when editting on a no samba machine (mac):
+  - alert and opt-in to write new config file 
+  - alert and continue 
+
 * catch pexpect exceptions and return a nice web based error line
-* log all actions and errors to a log file
+* log all actions and errors to a log file through remote executor
 * create some decent html
 * Write docs and a nice README
 * Add some screenshots to docs
 * Add clean docstrings to all functions
 * Use django bootstrap for forms
+* Replace pam module with sudo 
+* Refactor utils to use sudo approved external executor that checks the database is the command is present in models

@@ -28,7 +28,7 @@ class SambaShareField(forms.CharField):
         
 class UserOnlyForm(forms.Form):
     username = UnixUsernameField(max_length=50, required=True, label='User')
-    groups = forms. ModelMultipleChoiceField(
+    groups = forms.ModelMultipleChoiceField(
         label="Group permissions",
         required=False,
         queryset=ManageableGroup.objects.all())
@@ -41,7 +41,7 @@ class LoginForm(forms.Form):
 
 class AddChangePasswordForm(LoginForm):
     confirm_password = forms.CharField(max_length=20, required=True, widget=forms.PasswordInput, label='Config password')
-    groups = forms. ModelMultipleChoiceField(
+    groups = forms.ModelMultipleChoiceField(
         label="Group permissions",
         required=False,
         queryset=ManageableGroup.objects.all())
@@ -50,7 +50,7 @@ class AddChangePasswordForm(LoginForm):
 class SambaShareForm(forms.Form):
     name = SambaShareField(label='Name')
     comment = forms.CharField(label='Comment')
-    allowed_groups = forms. ModelMultipleChoiceField(
+    allowed_groups = forms.ModelMultipleChoiceField(
         label="Group permissions",
         required=False,
         queryset=ManageableGroup.objects.all())
