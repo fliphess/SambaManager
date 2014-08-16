@@ -1,7 +1,7 @@
 {% extends "base/template.html" %}
 
 {% block navbar %}
-{%  include "samba/nav/samba_nav.html" %}
+{%  include "samba_manager/nav/samba_nav.html" %}
 {% endblock %}
 
 {% block content %}
@@ -9,9 +9,9 @@
   <div class="container">
 
     {% if success %}
-      {% include "samba/nav/alert_ok.html" %}
+      {% include "samba_manager/nav/alert_ok.html" %}
     {% else %}
-      {% include "samba/nav/alert_nok.html" %}
+      {% include "samba_manager/nav/alert_nok.html" %}
     {% endif %}
 
     <form action="{% url "add_user" %}" method="post">{% csrf_token %}
