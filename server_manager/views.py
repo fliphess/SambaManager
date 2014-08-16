@@ -63,7 +63,6 @@ def edit_command(request, name):
     status = Status()
     status.set(message="Update all fields to edit a command", success=True)
 
-
     if request.method == "POST":
         form = ServerCommandForm(request.POST)
         if form.is_valid():

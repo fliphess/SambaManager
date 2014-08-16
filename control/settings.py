@@ -68,3 +68,6 @@ SAMBA_SHARES_DIR = '/srv/{0}'
 
 with open('/etc/passwd') as fh:
     USERS = [ line.split(':')[0] for line in fh.readlines() if not line.startswith('#')]
+
+with open('/etc/group') as fh2:
+    GROUPS = [ line.split(':')[0] for line in fh2.readlines() if not line.startswith('#')]
