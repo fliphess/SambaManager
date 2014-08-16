@@ -4,13 +4,14 @@
  <div class="row">
   <div class="container">
     <div class="hero-unit center">
-      {% if users.count %}
+      {% if commands.count %}
      <table class="table table-hover">
         <thead>
           <tr>
             <th>Enabled</th>
             <th>Name</th>
             <th>Command</th>
+            <th>Sudo</th>
             <th>Title</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -22,6 +23,7 @@
             <td>{{ command.enabled }}</td>
             <td>{{ command.name }}</td>
             <td>{{ command.command }}</td>
+            <td>{{ command.sudo }}</td>
             <td>{{ command.title }}</td>
             <td><a href="{% url "edit_command" command.name %}" class="btn btn-warning btn-sm">Edit</a>
             <td><a href="{% url "delete_command" command.name %}" class="btn btn-danger btn-sm">Delete</a>
