@@ -15,7 +15,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'samba_manager',
-    'server_control',
+    'server_manager',
 )
 
 MIDDLEWARE_CLASSES = (

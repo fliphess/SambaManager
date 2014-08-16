@@ -1,5 +1,5 @@
 from django.contrib import admin
-from server_control.models import ServerCommand
+from server_manager.models import ServerCommand
 
 
 class ServerCommandAdmin(admin.ModelAdmin):

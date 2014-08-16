@@ -5,6 +5,12 @@
   <div class="container">
     <div class="hero-unit center">
 
+        {% if success == True %}
+            {% include "base/alert/alert_ok.html" %}
+        {% elif success == False %}
+            {% include "base/alert/alert_nok.html" %}
+        {% endif %}
+
         <form action="{% url "edit_command" command.name %}" method="post">{% csrf_token %}
           <table>
             {{ form.as_table }}

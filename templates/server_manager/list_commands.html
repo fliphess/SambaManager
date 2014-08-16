@@ -4,7 +4,14 @@
  <div class="row">
   <div class="container">
     <div class="hero-unit center">
-      {% if commands.count %}
+
+    {% if success == True %}
+      {% include "base/alert/alert_ok.html" %}
+    {% elif success == False %}
+      {% include "base/alert/alert_nok.html" %}
+    {% endif %}
+
+    {% if commands.count %}
      <table class="table table-hover">
         <thead>
           <tr>
@@ -34,7 +41,6 @@
       <br/>
       {% endif %}
       <a class="btn btn-default" href="{% url "add_command" %}" role="button">Add Command</a>
-      <a class="btn btn-default" href="{% url "list_commands" %}" role="button">Edit Commands</a>
     </div>
   </div>
 </div>
