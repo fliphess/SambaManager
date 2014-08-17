@@ -16,6 +16,7 @@ SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 ```
 
 ## IN PROGRESS
+* class based views samba
 
 * log all actions and errors to a log file through remote executor
 * Replace pam module with sudo 
