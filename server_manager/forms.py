@@ -2,7 +2,7 @@ from django import forms
 
 
 class ServerCommandForm(forms.Form):
-    enabled = forms.BooleanField(required=False, label="Enable")
+    visible = forms.BooleanField(required=False, label="Visible")
     sudo = forms.BooleanField(required=False, label="Sudo")
     name = forms.CharField(required=True, label="Name")
     command = forms.CharField(required=True, label="Command")

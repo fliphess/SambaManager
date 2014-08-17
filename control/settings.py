@@ -61,13 +61,15 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+REMOTE_EXECUTOR = os.path.join(BASE_DIR, 'remote_executor.py')
+
 ROOT_PASSWORD = ''
 SAMBA_CONF = '/etc/samba/smb.conf'
 USER_HOME_DIR = '/home/{0}'
 SAMBA_SHARES_DIR = '/srv/{0}'
-
+LOGFILE = '/tmp/some_log_file.log'
 with open('/etc/passwd') as fh:
-    USERS = [ line.split(':')[0] for line in fh.readlines() if not line.startswith('#')]
+    USERS = [line.split(':')[0] for line in fh.readlines() if not line.startswith('#')]
 
 with open('/etc/group') as fh2:
-    GROUPS = [ line.split(':')[0] for line in fh2.readlines() if not line.startswith('#')]
+    GROUPS = [line.split(':')[0] for line in fh2.readlines() if not line.startswith('#')]
