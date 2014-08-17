@@ -6,11 +6,8 @@
 
 {% block content %}
 
-{% if success == True %}
-  {% include "base/alert/alert_ok.html" %}
-{% elif success == False %}
- {% include "base/alert/alert_nok.html" %}
-{% endif %}
+  {% include "base/alert/top.html" %}
+
 
  <div class="row">
   <div class="container">

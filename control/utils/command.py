@@ -2,7 +2,7 @@ import logging
 import subprocess
 from django.conf import settings
 
-def run_command(script, log, sudo=False):
+def executor(script, log, sudo=False):
     output = []
 
     if sudo:
@@ -13,12 +13,12 @@ def run_command(script, log, sudo=False):
     process = subprocess.Popen(script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while True:
         nextline = process.stdout.readline()
-        if nextline == '' and process.poll() != None:
+        if nextline == '' and process.poll() is not None:
             break
         elif nextline == '\n' or nextline == '':
             continue
-        output.append(nextline)
-        log.info('remote_executor - %s' % nextline.strip())
+        output.append(nextline.strip())
+        log.info('exe - %s' % nextline.strip())
     exitcode = process.returncode
     return output, exitcode
 

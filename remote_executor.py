@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/Users/flip/.virtualenvs/nas/bin/python
+#/usr/bin/env python
 import argparse
 import os
+import subprocess
 import sys
 from django.core.exceptions import ObjectDoesNotExist
-from control.utils.command import logger, run_command
 
 sys.path.append(".")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "control.settings")
@@ -19,29 +20,54 @@ def parse_options():
     return parser.parse_args()
 
 
+def run_command(script, sudo=False):
+    output = []
+
+    if sudo:
+        script = "sudo %s" % script
+    script += ' 2>&1'
+
+    print('Running command: %s' % script)
+    process = subprocess.Popen(script, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        nextline = process.stdout.readline()
+        if nextline == '' and process.poll() is not None:
+            break
+        elif nextline == '\n' or nextline == '':
+            continue
+        output.append(nextline.strip())
+    exitcode = process.returncode
+    return output, exitcode
+
+
 def main():
     arguments = parse_options()
-    l = logger("server_manager remote executor: %s" % arguments.name, arguments.quiet)
 
-    l.info('Getting database object for %s' % arguments.name)
+    print('Getting database object for %s' % arguments.name)
     try:
         command = ServerCommand.objects.get(name=arguments.name)
     except ObjectDoesNotExist as e:
-        l.error('Command %s not found in database: %s' % (arguments.name, e))
+        print('Command %s not found in database: %s' % (arguments.name, e))
         sys.exit(1)
 
-    output, exitcode = run_command(script=command.command, log=l, sudo=command.sudo)
+    output, exitcode = run_command(script=command.command, sudo=command.sudo)
+
+    print
+    print('Output for %s was:' % command.command)
+    print
+    for line in output:
+        print line.strip("\n")
 
     if exitcode != 0:
-        l.error('Command %s Failed! Exitcode was %s' % (command.name, exitcode))
-        l.error('Output for %s was: %s' % (command.command, output))
+        print
+        print('FAIL - Command %s Failed! Exitcode was %s' % (command.name, exitcode))
         sys.exit(exitcode)
     else:
-        l.info('OK - Command %s exited with exitcode %s' % (command.name, exitcode))
-        l.info('Output for %s was: %s' % (command.command, output))
-
-    l.info('All done!')
-
+        print
+        print('OK - Command %s exited with exitcode %s' % (command.name, exitcode))
+        print
+        print('All done!')
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

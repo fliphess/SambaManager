@@ -1,6 +1,9 @@
+from django.conf import settings
+
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from control.utils.command import logger, executor
 
 from control.utils.status import Status
 from server_manager.forms import ServerCommandForm
@@ -103,3 +106,23 @@ def delete_command(request, name):
         status.add(item={"commands": ServerCommand.objects.all()})
         return render(request, "server_manager/command_editor.html", status.get())
     return render(request, "server_manager/delete_command.html", status.get())
+
+
+@login_required(login_url='/login/')
+def command_executor(request, name):
+    command = get_object_or_404(ServerCommand, name=name)
+    status = Status()
+    status.add(item={"command": command})
+    status.add(item={"commands": ServerCommand.objects.all()})
+
+    command_line = '%s -n %s' % (settings.REMOTE_EXECUTOR, name)
+    l = logger(name=name)
+    output, exitcode = executor(script=command_line, log=l, sudo=command.sudo)
+
+    if exitcode == 0:
+        status.set(message="command %s succeeded" % name, success=True)
+    else:
+        status.set(message="command %s failed" % name, success=False)
+    status.add(item={"output": output, "exitcode": exitcode})
+
+    return render(request, 'server_manager/command_overview.html', status.get())

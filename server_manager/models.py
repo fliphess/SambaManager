@@ -9,11 +9,13 @@ class ServerCommand(models.Model):
     command = models.CharField('command', max_length=100, unique=False)
     title = models.CharField('title', max_length=100, unique=False)
 
+    db_table = "command"
+
     def __unicode__(self):
         return self.name
 
     def __str__(self):
-        return "<ServerCommand object: %s" % self.name
+        return self.name
 
     def __repr__(self):
         return "%s" % {
