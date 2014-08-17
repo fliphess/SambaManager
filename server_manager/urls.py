@@ -1,15 +1,18 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+from server_manager.views import CommandOverView, CommandEditor, AddCommand, EditCommand, DeleteCommand, CommandExecutor
+
 admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url(r'^/?$', 'server_manager.views.command_overview', name='command_overview'),
-    url(r'^command_editor/?$', 'server_manager.views.command_editor', name='command_editor'),
-    url(r'^executor/(?P<name>\w+)/$', 'server_manager.views.command_executor', name='command_executor'),
+    url(r'^/?$', login_required(CommandOverView.as_view()), name='command_overview'),
+    url(r'^command_editor/?$', login_required(CommandEditor.as_view()), name='command_editor'),
+    url(r'^executor/(?P<name>\w+)/$', CommandExecutor.as_view(), name='command_executor'),
 
 
-    url(r'^add_command/$', 'server_manager.views.add_command', name='add_command'),
-    url(r'^edit_command/(?P<name>\w+)/$', 'server_manager.views.edit_command', name='edit_command'),
-    url(r'^delete_command/(?P<name>\w+)/$', 'server_manager.views.delete_command', name='delete_command'),
+    url(r'^add_command/$', login_required(AddCommand.as_view()), name='add_command'),
+    url(r'^edit_command/(?P<name>\w+)/$', login_required(EditCommand.as_view()), name='edit_command'),
+    url(r'^delete_command/(?P<name>\w+)/$', login_required(DeleteCommand.as_view()), name='delete_command'),
 )

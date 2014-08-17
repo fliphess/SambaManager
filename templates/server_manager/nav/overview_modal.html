@@ -24,7 +24,7 @@
         <div class="modal-footer">
           <form method="post" action="{% url "command_executor" command.name %}">
             {% csrf_token %}
-            <input type="hidden" name="action" value="{{ command.name }}" />
+            <input type="hidden" name="name" value="{{ command.name }}" />
             <button type="submit" class="btn btn-default">Continue</button>
           </form>
         </div>

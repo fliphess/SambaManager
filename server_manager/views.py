@@ -1,8 +1,7 @@
 from django.conf import settings
-
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import View
 from control.utils.command import logger, executor
 
 from control.utils.status import Status
@@ -10,25 +9,36 @@ from server_manager.forms import ServerCommandForm
 from server_manager.models import ServerCommand
 
 
-@login_required(login_url="/login/")
-def command_overview(request):
-    commands = ServerCommand.objects.all()
-    return render(request, "server_manager/command_overview.html", {"commands": commands})
-
-
-@login_required(login_url="/login/")
-def command_editor(request):
-    commands = ServerCommand.objects.all()
-    return render(request, "server_manager/command_editor.html", {"commands": commands})
-
-
-@transaction.atomic()
-@login_required(login_url="/login/")
-def add_command(request):
+class BaseCommandView(View):
     status = Status()
-    status.set(message="Fill in all fields to add a command", success=True)
+    template = None
 
-    if request.method == "POST":
+    def get(self, request, **kwargs):
+        self.status.add(item={"commands": ServerCommand.objects.all()})
+        return render(request, self.template, self.status.get())
+
+
+class CommandOverView(BaseCommandView):
+    template = "server_manager/command_overview.html"
+
+    def get(self, request, **kwargs):
+        return super(CommandOverView, self).get(request)
+
+
+class CommandEditor(CommandOverView):
+    template = "server_manager/command_editor.html"
+
+
+class AddCommand(BaseCommandView):
+    template = "server_manager/add_command.html"
+
+    def get(self, request, **kwargs):
+        self.status.add({"form": ServerCommandForm()})
+        self.status.set(message="Fill in all fields to add a command", success=True)
+        return super(AddCommand, self).get(request)
+
+    @transaction.atomic()
+    def post(self, request):
         form = ServerCommandForm(request.POST)
 
         if form.is_valid():
@@ -39,37 +49,39 @@ def add_command(request):
             title = form.clean()["title"]
 
             if ServerCommand.objects.filter(name=name):
-                status.set(message="Command already exists", success=False)
+                self.status.set(message="Command already exists", success=False)
             else:
                 ServerCommand.objects.create(name=name, visible=visible, sudo=sudo, command=command, title=title)
-                status.set(message="Command added", success=True)
-                status.add(item={"commands": ServerCommand.objects.all()})
-                return render(request, "server_manager/command_editor.html", status.get())
+                self.status.set(message="Command added", success=True)
+                self.status.add(item={"commands": ServerCommand.objects.all()})
+                return render(request, "server_manager/command_editor.html", self.status.get())
         else:
-            status.set(message='Invalid input', success=False)
-
-    status.add({"form": ServerCommandForm()})
-    return render(request, "server_manager/add_command.html", status.get())
+            self.status.set(message='Invalid input', success=False)
+            return self.get(request=request)
 
 
-@transaction.atomic()
-@login_required(login_url="/login/")
-def edit_command(request, name):
-    command = get_object_or_404(ServerCommand, name=name)
-
-    initial = {
-        "visible": command.visible,
-        "sudo": command.sudo,
-        "name": command.name,
-        "command": command.command,
-        "title": command.title,
-    }
-
+class EditCommand(View):
     status = Status()
     status.set(message="Update all fields to edit a command", success=True)
+    template = "server_manager/edit_command.html"
 
-    if request.method == "POST":
+    def get(self, request, name):
+        command = get_object_or_404(ServerCommand, name=name)
+        initial = {
+            "visible": command.visible,
+            "sudo": command.sudo,
+            "name": command.name,
+            "command": command.command,
+            "title": command.title,
+        }
+        self.status.add(item={"form": ServerCommandForm(initial=initial), "command": command})
+        return render(request, self.template, self.status.get())
+
+    @transaction.atomic()
+    def post(self, request, name):
         form = ServerCommandForm(request.POST)
+        command = get_object_or_404(ServerCommand, name=name)
+
         if form.is_valid():
             command.visible = form.clean()["visible"]
             command.sudo = form.clean()["sudo"]
@@ -78,51 +90,58 @@ def edit_command(request, name):
             command.title = form.clean()["title"]
             command.save(force_update=True)
 
-            status.set(success=True, message="Command updated")
-            status.add(item={"commands": ServerCommand.objects.all()})
-            return render(request, "server_manager/command_editor.html", status.get())
+            self.status.set(success=True, message="Command updated")
+            self.status.add(item={"commands": ServerCommand.objects.all()})
+            return render(request, "server_manager/command_editor.html", self.status.get())
 
         else:
-            status.set(success=False, message='Invalid input')
-
-    status.add(item={"form": ServerCommandForm(initial=initial), "command": command})
-    return render(request, "server_manager/edit_command.html", status.get())
+            self.status.set(success=False, message='Invalid input')
+            return self.get(request, name)
 
 
-@transaction.atomic()
-@login_required(login_url="/login/")
-def delete_command(request, name):
-    command = get_object_or_404(ServerCommand, name=name)
+class DeleteCommand(View):
     status = Status()
-    status.add(item={"command": command})
 
-    if request.method == "POST":
+    def get(self, request, name):
+        command = get_object_or_404(ServerCommand, name=name)
+        self.status.add(item={"command": command})
+        return render(request, "server_manager/delete_command.html", self.status.get())
+
+    @transaction.atomic()
+    def post(self, request, name):
+        command = get_object_or_404(ServerCommand, name=name)
+        self.status.add(item={"command": command})
+
         if request.POST.get("delete", None) == "1":
             ServerCommand.objects.get(name=name).delete()
-            status.set(success=True, message="Command deleted")
-        else:
-            status.set(success=False, message="Deletion of command %s canceled" % command.name)
+            self.status.set(success=True, message="Command deleted")
+            self.status.add(item={"commands": ServerCommand.objects.all()})
+            return render(request, "server_manager/command_editor.html", self.status.get())
 
-        status.add(item={"commands": ServerCommand.objects.all()})
-        return render(request, "server_manager/command_editor.html", status.get())
-    return render(request, "server_manager/delete_command.html", status.get())
+        self.status.set(success=False, message="Deletion of command %s canceled" % command.name)
+        return self.get(request, name)
 
 
-@login_required(login_url='/login/')
-def command_executor(request, name):
-    command = get_object_or_404(ServerCommand, name=name)
+class CommandExecutor(BaseCommandView):
     status = Status()
-    status.add(item={"command": command})
-    status.add(item={"commands": ServerCommand.objects.all()})
+    template = 'server_manager/command_overview.html'
 
-    command_line = '%s -n %s' % (settings.REMOTE_EXECUTOR, name)
-    l = logger(name=name)
-    output, exitcode = executor(script=command_line, log=l, sudo=command.sudo)
+    def post(self, request, name):
+        command = get_object_or_404(ServerCommand, name=name)
+        self.status.add(item={"command": command})
 
-    if exitcode == 0:
-        status.set(message="command %s succeeded" % name, success=True)
-    else:
-        status.set(message="command %s failed" % name, success=False)
-    status.add(item={"output": output, "exitcode": exitcode})
+        if request.POST.get("name", None) != name:
+            self.status.set(message="Incorrect input", success=False)
+            return self.get(request, name)
 
-    return render(request, 'server_manager/command_overview.html', status.get())
+        command_line = '%s -n %s' % (settings.REMOTE_EXECUTOR, name)
+        l = logger(name=name)
+        output, exitcode = executor(script=command_line, log=l, sudo=command.sudo)
+        self.status.add(item={"output": output, "exitcode": exitcode})
+
+        if exitcode == 0:
+            self.status.set(message="command %s succeeded" % name, success=True)
+        else:
+            self.status.set(message="command %s failed" % name, success=False)
+        return self.get(request, name)
+
