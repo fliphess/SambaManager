@@ -15,9 +15,17 @@ def parse_options():
     parser = argparse.ArgumentParser(description="""
         Django Server Manager Remote Executor - Flip Hess 2014 - <flip@fliphess.com>
     """)
-    parser.add_argument('-n', '--name', help='Where to find the settings file', required=True, type=str)
+    parser.add_argument('-n', '--name', help='Where to find the settings file', required=False, type=str)
+    parser.add_argument('-l', '--list', help='List all available options', required=False, action="store_true")
     parser.add_argument('-q', '--quiet', help='Be more silent', action='count', default=0)
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.name and args.list:
+        parser.error("Please choose one, can't have both")
+
+    if not args.name and not args.list:
+        parser.error("Please choose either one, can't have none")
+    return args
 
 
 def run_command(script, sudo=False):
@@ -42,6 +50,12 @@ def run_command(script, sudo=False):
 
 def main():
     arguments = parse_options()
+
+    if arguments.list:
+        print("Getting all available items")
+        for item in ServerCommand.objects.all():
+            print "- %s" % item.name
+        sys.exit(0)
 
     print('Getting database object for %s' % arguments.name)
     try:
