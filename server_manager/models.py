@@ -11,3 +11,16 @@ class ServerCommand(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def __str__(self):
+        return "<ServerCommand object: %s" % self.name
+
+    def __repr__(self):
+        return "%s" % {
+            "system_cmd": self.system_cmd,
+            "visible": self.visible,
+            "sudo": self.sudo,
+            "name": self.name,
+            "command": self.command,
+            "title": self.title
+        }

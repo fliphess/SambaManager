@@ -9,7 +9,7 @@
 {% if success == True %}
   {% include "base/alert/alert_ok.html" %}
 {% elif success == False %}
-  {% include "base/alert/alert_nok.html" %}
+ {% include "base/alert/alert_nok.html" %}
 {% endif %}
 
  <div class="row">
@@ -18,7 +18,7 @@
 
       {% for command in commands %}
         {% if command.visible == True %}
-            {% include "server_manager/nav/modal.html" %}
+            {% include "server_manager/nav/overview_modal.html" %}
         {% endif %}
       {% endfor %}
 

@@ -1,12 +1,10 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
 from django.db import transaction
-from django.http import HttpResponseRedirect
-from control.status import Status
 
-from samba_manager import utils
+from control.utils.status import Status
+from control.utils import samba_utils as utils
 from samba_manager.models import ManageableUser, ManageableGroup, ManageableShare
 from samba_manager.forms import AddChangePasswordForm, GroupForm, UserOnlyForm, SambaShareForm
 

@@ -65,6 +65,7 @@ ROOT_PASSWORD = ''
 SAMBA_CONF = '/etc/samba/smb.conf'
 USER_HOME_DIR = '/home/{0}'
 SAMBA_SHARES_DIR = '/srv/{0}'
+LOGFILE = '/tmp/some_log_file.log'
 
 with open('/etc/passwd') as fh:
     USERS = [ line.split(':')[0] for line in fh.readlines() if not line.startswith('#')]

@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404
-from control.status import Status
+
+from control.utils.status import Status
 from server_manager.forms import ServerCommandForm
 from server_manager.models import ServerCommand
 

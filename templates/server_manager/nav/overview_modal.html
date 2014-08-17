@@ -9,9 +9,11 @@
       <div class="modal-content">
 
         <div class="modal-header">
-          <h2 class="modal-title" id="{{ command.name }}ModalLabel">Run {{ command.title }}</h2>
-            <h3>Command line:<br>
-                <code>{{ command.command }}</code></h3>
+          <h2 class="modal-title" id="{{ command.name }}ModalLabel">{{ command.title }}</h2>
+            <h3>Name:</h4>
+            {{ command.name }}<br>
+            <h3>Command line:</h3><br>
+            <code>{{ command.command }}</code></h5>
         </div>
 
         <div class="modal-header panel-heading">
@@ -20,8 +22,9 @@
         </div>
 
         <div class="modal-footer">
-          <form method="post" action="{% url "run_command" command.name %}">{% csrf_token %}
-            <input type="hidden" name="action" value="1" />
+          <form method="post" action="{% url "run_command" command.name %}?next={% url "command_overview" %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="{{ command.name }}" />
             <button type="submit" class="btn btn-default">Continue</button>
           </form>
         </div>

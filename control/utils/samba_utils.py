@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import types
-from django.conf import settings
-import pexpect
 import datetime
-
 from tempfile import NamedTemporaryFile
 from ConfigParser import SafeConfigParser
 
-from samba_manager.utils import pam
+from django.conf import settings
+import pexpect
+
+from control.utils import pam
 from samba_manager.models import ManageableGroup, ManageableShare, ManageableUser
 
 
