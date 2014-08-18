@@ -32,7 +32,7 @@ class CommandEditor(CommandOverView):
 class AddCommand(BaseCommandView):
     template = "server_manager/add_command.html"
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         self.status.add({"form": ServerCommandForm()})
         self.status.set(message="Fill in all fields to add a command", success=True)
         return super(AddCommand, self).get(request)
