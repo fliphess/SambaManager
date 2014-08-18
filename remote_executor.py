@@ -4,6 +4,7 @@ import argparse
 import os
 import subprocess
 import sys
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 sys.path.append(".")
@@ -64,7 +65,11 @@ def main():
         print('Command %s not found in database: %s' % (arguments.name, e))
         sys.exit(1)
 
-    output, exitcode = run_command(script=command.command, sudo=command.sudo)
+    if settings.DEVELOPMENT:
+        output = ["BOGUS DATA", "-", "This instance is running in development mode"]
+        exitcode = 0
+    else:
+        output, exitcode = run_command(script=command.command, sudo=command.sudo)
 
     print
     print('Output for %s was:' % command.command)

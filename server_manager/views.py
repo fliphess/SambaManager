@@ -13,7 +13,7 @@ class BaseCommandView(View):
     status = Status()
     template = None
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         self.status.add(item={"commands": ServerCommand.objects.all()})
         return render(request, self.template, self.status.get())
 
@@ -57,7 +57,7 @@ class AddCommand(BaseCommandView):
                 return render(request, "server_manager/command_editor.html", self.status.get())
         else:
             self.status.set(message='Invalid input', success=False)
-            return self.get(request=request)
+        return self.get(request=request)
 
 
 class EditCommand(View):

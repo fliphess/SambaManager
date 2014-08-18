@@ -73,3 +73,6 @@ with open('/etc/passwd') as fh:
 
 with open('/etc/group') as fh2:
     GROUPS = [line.split(':')[0] for line in fh2.readlines() if not line.startswith('#')]
+
+
+DEVELOPMENT = True
