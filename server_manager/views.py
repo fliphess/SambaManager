@@ -1,8 +1,9 @@
+import subprocess
 from django.conf import settings
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
-from control.utils.command import logger, executor
+from control.utils.log import logger
 
 from control.utils.status import Status
 from server_manager.forms import ServerCommandForm
@@ -13,7 +14,7 @@ class BaseCommandView(View):
     status = Status()
     template = None
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         self.status.add(item={"commands": ServerCommand.objects.all()})
         return render(request, self.template, self.status.get())
 
@@ -32,7 +33,7 @@ class CommandEditor(CommandOverView):
 class AddCommand(BaseCommandView):
     template = "server_manager/add_command.html"
 
-    def get(self, request, **kwargs):
+    def get(self, request, *args, **kwargs):
         self.status.add({"form": ServerCommandForm()})
         self.status.set(message="Fill in all fields to add a command", success=True)
         return super(AddCommand, self).get(request)
@@ -57,7 +58,7 @@ class AddCommand(BaseCommandView):
                 return render(request, "server_manager/command_editor.html", self.status.get())
         else:
             self.status.set(message='Invalid input', success=False)
-            return self.get(request=request)
+        return self.get(request=request)
 
 
 class EditCommand(View):
@@ -134,10 +135,8 @@ class CommandExecutor(BaseCommandView):
             self.status.set(message="Incorrect input", success=False)
             return self.get(request, name)
 
-        command_line = '%s -n %s' % (settings.REMOTE_EXECUTOR, name)
-        l = logger(name=name)
-        output, exitcode = executor(script=command_line, log=l, sudo=command.sudo)
-        self.status.add(item={"output": output, "exitcode": exitcode})
+        command_output, exitcode = self.run(name=name, command=command)
+        self.status.add(item={"output": command_output, "exitcode": exitcode})
 
         if exitcode == 0:
             self.status.set(message="command %s succeeded" % name, success=True)
@@ -145,3 +144,22 @@ class CommandExecutor(BaseCommandView):
             self.status.set(message="command %s failed" % name, success=False)
         return self.get(request, name)
 
+    def run(self, name, command):
+        log = logger(name=name)
+
+        command_output = []
+        command_line = '%s -n %s 2>&1' % (settings.REMOTE_EXECUTOR, name)
+        if command.sudo:
+            command_line = "sudo %s" % command_line
+
+        log.info('Running command: %s' % command_line)
+        process = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        while True:
+            next_line = process.stdout.readline()
+            if next_line == '' and process.poll() is not None:
+                break
+            command_output.append(next_line.strip())
+            log.info('%s' % next_line.strip())
+        exitcode = process.returncode
+
+        return command_output, exitcode

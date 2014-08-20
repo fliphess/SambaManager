@@ -1,45 +1,62 @@
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.db import transaction
+from django.views.generic import View
 
-from control.utils.status import Status
+from control.utils.status import Status, SambaTotals
 from control.utils import samba_utils as utils
 from samba_manager.models import ManageableUser, ManageableGroup, ManageableShare
 from samba_manager.forms import AddChangePasswordForm, GroupForm, UserOnlyForm, SambaShareForm
 
 
-@login_required(login_url='/login/')
-def index(request):
-    return render(request, 'samba_manager/base.html', {'text': 'This should become some wild overview page with statistics and logs and events and messages but for now all you got is this lousy empty page'})
-
-
-@login_required(login_url='/login/')
-def list_users(request):
-    users = ManageableUser.objects.all()
-    return render(request, 'samba_manager/list_users.html', {'users': users})
-
-
-@login_required(login_url='/login/')
-def list_groups(request):
-    groups = ManageableGroup.objects.all()
-    return render(request, 'samba_manager/list_groups.html', {'groups': groups})
-
-
-@login_required(login_url='/login/')
-def list_shares(request):
-    shares = ManageableShare.objects.all()
-    return render(request, 'samba_manager/list_shares.html', {'shares': shares})
-
-
-@transaction.atomic()
-@login_required(login_url='/login/')
-def add_user(request):
+class BaseSambaView(View):
     status = Status()
-    status.set(message='Fill in all fields to add a user', success=True)
+    template = None
+    data = None
 
-    if request.method == 'POST':
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template, self.status.get())
+
+
+class IndexView(BaseSambaView):
+    status = Status()
+    totals = SambaTotals()
+    status.add({"totals": totals})
+    template = 'samba_manager/base.html'
+
+
+class ListUsers(BaseSambaView):
+    status = Status()
+    status.add({"users": ManageableUser.objects.all()})
+    template = "samba_manager/list_users.html"
+
+
+class ListGroups(BaseSambaView):
+    status = Status()
+    status.add(item={"groups": ManageableGroup.objects.all()})
+    template = 'samba_manager/list_groups.html'
+
+
+class ListShares(BaseSambaView):
+    status = Status()
+    status.add(item={"shares": ManageableShare.objects.all()})
+    template = 'samba_manager/list_shares.html'
+
+
+class AddUser(BaseSambaView):
+    status = Status()
+    template = "samba_manager/add_user.html"
+
+    def get(self, request, *args, **kwargs):
+        self.status.set(message='Fill in all fields to add a user', success=True)
+        self.status.add(item={"form": AddChangePasswordForm()})
+        return super(AddUser, self).get(request)
+
+
+    @transaction.atomic()
+    def post(self, request):
         form = AddChangePasswordForm(request.POST)
+
         if form.is_valid():
             name = form.clean()['username']
             pass1 = form.clean()['password']
@@ -47,186 +64,199 @@ def add_user(request):
             groups = form.clean()['groups']
 
             if ManageableUser.objects.filter(name=name) or name in settings.USERS:
-                status.set(message='User already exists', success=False)
+                self.status.set(message='User already exists', success=False)
             else:
                 if pass1 == pass2:
                     utils.add_user(name, pass1)
                     utils.set_user_groups(name, groups)
-                    status.set(message='User added', success=True)
+                    self.status.set(message='User added', success=True)
+                    self.status.add(item={"users": ManageableUser.objects.all()})
+                    return render(request, 'samba_manager/list_users.html', self.status.get())
                 else:
-                    status.set(message='Passwords do not match.', success=False)
+                    self.status.set(message='Passwords do not match.', success=False)
         else:
-            status.set(message='Invalid input', success=False)
+            self.status.set(message='Invalid input', success=False)
 
-        status.add(item={"users": ManageableUser.objects.all()})
-        return render(request, 'samba_manager/list_users.html', status.get())
-
-    status.add(item={"form": AddChangePasswordForm()})
-    return render(request, 'samba_manager/add_user.html', status.get())
+        return self.get(request)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def add_group(request):
+class AddGroup(BaseSambaView):
     status = Status()
-    status.set(message='Fill in all fields to add a group', success=True)
+    template = "samba_manager/add_group.html"
 
-    if request.method == 'POST':
+    def get(self, request, *args, **kwargs):
+        self.status.add(item={"form": GroupForm()})
+        self.status.set(message='Fill in all fields to add a group', success=True)
+        return super(AddGroup, self).get(request)
+
+    def post(self, request):
         form = GroupForm(request.POST)
         if form.is_valid():
             name = form.clean()['name']
+
             if ManageableGroup.objects.filter(name=name) or name in settings.GROUPS:
-                status.set(message='Group already exists', success=False)
+                self.status.set(message='Group already exists', success=False)
             else:
                 utils.add_group(name)
-                status.set(message='Group added', success=True)
+                self.status.set(message='Group added', success=True)
         else:
-            status.set(message='Invalid input', success=False)
-        status.add(item={"groups": ManageableGroup.objects.all()})
-        return render(request, 'samba_manager/list_groups.html', status.get())
-
-    status.add(item={"form": GroupForm()})
-    return render(request, 'samba_manager/add_group.html', status.get())
+            self.status.set(message='Invalid input', success=False)
+        return self.get(request)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def add_share(request):
+class AddShare(BaseSambaView):
     status = Status()
-    status.set(message='Fill in all fields to add a share', success=True)
+    template = "samba_manager/add_share.html"
 
-    if request.method == 'POST':
+    def get(self, request, *args, **kwargs):
+        self.status.add(item={"form": SambaShareForm()})
+        self.status.set(message='Fill in all fields to add a share', success=True)
+        return super(AddShare, self).get(request)
+
+    @transaction.atomic()
+    def post(self, request):
         form = SambaShareForm(request.POST)
+
         if form.is_valid():
             name = form.clean()['name']
+
             if ManageableGroup.objects.filter(name=name):
-                status.set(message='Group already exists', success=False)
+                self.status.set(message='Group already exists', success=False)
             else:
                 utils.add_change_samba_share(form.clean())
-                status.set(message='Share added', success=True)
+                self.status.set(message='Share added', success=True)
+                self.status.add(item={"shares": ManageableShare.objects.all()})
         else:
-            status.set(message='Invalid input', success=False)
-        status.add(item={"shares": ManageableShare.objects.all()})
-        return render(request, 'samba_manager/list_shares.html', status.get())
-
-    status.add(item={"form": SambaShareForm()})
-    return render(request, 'samba_manager/add_share.html', status.get())
+            self.status.set(message='Invalid input', success=False)
+        return self.get(request)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def edit_user(request, id):
-    user = get_object_or_404(ManageableUser, pk=id)
-
+class EditUser(View):
     status = Status()
     status.set(message="Update all fields to edit a user", success=True)
+    template = "samba_manager/edit_user.html"
 
-    if request.method == 'POST':
+    def get(self, request, id):
+        user = get_object_or_404(ManageableUser, pk=id)
+        self.status.add(item={"form": UserOnlyForm(initial={
+            'username': user.name, 'groups': utils.get_user_groups(user.name)})})
+        return render(request, self.template, self.status.get())
+
+    @transaction.atomic()
+    def post(self, request, id):
         form = UserOnlyForm(request.POST)
+        user = get_object_or_404(ManageableUser, pk=id)
 
         if form.is_valid():
-            name= user.name
+            name = user.name
             groups = form.clean()['groups']
             utils.set_user_groups(name, groups)
-            status.set(message="User %s updated" % name, success=True)
-            status.add(item={"users": ManageableUser.objects.all()})
-            return render(request, "samba_manager/list_users.html", status.get())
+
+            self.status.set(message="User %s updated" % name, success=True)
+            self.status.add(item={"users": ManageableUser.objects.all()})
+            return render(request, "samba_manager/list_users.html", self.status.get())
         else:
-            status.set(success=False, message='Invalid input')
-
-    status.add(item={"form": UserOnlyForm(initial={'username': user.name, 'groups': utils.get_user_groups(user.name)})})
-    return render(request, 'samba_manager/edit_user.html', status.get())
+            self.status.set(success=False, message='Invalid input')
+            return self.get(request, id)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def edit_share(request, id):
-    share = get_object_or_404(ManageableShare, pk=id)
-    share_conf = utils.get_samba_conf()
-
+class EditShare(View):
     status = Status()
     status.set(message='Update all fields to edit a share', success=True)
+    template = "samba_manager/edit_share.html"
 
-    if request.method == 'POST':
-        form = SambaShareForm(request.POST)
-        if form.is_valid():
-            utils.add_change_samba_share(form.clean())
-
-            status.set(message="Shared updated", success=True)
-            status.add(item={"shares": ManageableShare.objects.all()})
-            return render(request, "samba_manager/list_shares.html", status.get())
-        else:
-            status.set(message="Invalid input", success=True)
-
-    groups = map(lambda x: x.lstrip('@'), share_conf.get(share.name, 'valid users').split(' '))
-
-
-    status.add(item={"groups": groups, "share": share})
-    status.add(item={"form": SambaShareForm(
-        initial={
+    def get(self, request, id):
+        share = get_object_or_404(ManageableShare, pk=id)
+        share_conf = utils.get_samba_conf()
+        groups = map(lambda x: x.lstrip('@'), share_conf.get(share.name, 'valid users').split(' '))
+        initial = {
             'name': share.name,
             'comment': share_conf.get(share.name, 'comment'),
             'allowed_groups': groups,
-        })
-    })
-    return render(request, 'samba_manager/edit_share.html', status.get())
+        }
+        self.status.add(item={"groups": groups, "share": share})
+        self.status.add(item={"form": SambaShareForm(initial=initial)})
+        return render(request, self.template, self.status.get())
+
+    @transaction.atomic()
+    def post(self, request, id):
+        form = SambaShareForm(request.POST)
+        if form.is_valid():
+            utils.add_change_samba_share(form.clean())
+            self.status.set(message="Shared updated", success=True)
+            self.status.add(item={"shares": ManageableShare.objects.all()})
+            return render(request, "samba_manager/list_shares.html", self.status.get())
+        else:
+            self.status.set(message="Invalid input", success=True)
+            return self.get(request, id)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def delete_user(request, id):
-    user = get_object_or_404(ManageableUser, pk=id)
+class BaseDeleteView(View):
     status = Status()
-    status.add(item={"user": user})
+    template = None
+    model = None
+    element = None
 
-    if request.method == 'POST':
+    def get(self, request, id):
+        data = get_object_or_404(self.model, pk=id)
+        self.status.add(item={self.element: data})
+        return render(request, self.template, self.status.get())
+
+
+class DeleteUser(BaseDeleteView):
+    status = Status()
+    template = "samba_manager/delete_user.html"
+    model = ManageableUser
+    element = "user"
+
+    @transaction.atomic()
+    def post(self, request, id):
+        user = get_object_or_404(ManageableUser, pk=id)
+
         if request.POST.get('delete', None) == '1':
             utils.del_user(user.name)
-            status.set(message="User deleted", success=True)
+            self.status.set(message="User deleted", success=True)
+            self.status.add(item={"users": ManageableUser.objects.all()})
+            return render(request, "samba_manager/list_users.html", self.status.get())
         else:
-            status.set(message="Deletion canceled", success=False)
-
-        status.add(item={"users": ManageableUser.objects.all()})
-        return render(request, "samba_manager/list_users.html", status.get())
-
-    return render(request, 'samba_manager/delete_user.html', status.get())
+            self.status.set(message="Deletion canceled", success=False)
+        return self.get(request, id)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def delete_group(request, id):
-    group = get_object_or_404(ManageableGroup, pk=id)
+class DeleteGroup(BaseDeleteView):
     status = Status()
-    status.add(item={"group": group})
+    template = 'samba_manager/delete_group.html'
+    model = ManageableGroup
+    element = "group"
 
-    if request.method == 'POST':
+    @transaction.atomic()
+    def post(self, request, id):
+        group = get_object_or_404(ManageableGroup, pk=id)
         if request.POST.get('delete', None) == '1':
             utils.del_group(group.name)
-            status.set(message='Group deleted', success=True)
+            self.status.set(message='Group deleted', success=True)
+            self.status.add(item={"shares": ManageableGroup.objects.all()})
+            return render(request, "samba_manager/list_groups.html", self.status.get())
         else:
-            status.set(message="Deletion canceled", success=False)
-
-        status.add(item={"shares": ManageableGroup.objects.all()})
-        return render(request, "samba_manager/list_groups.html", status.get())
-
-    return render(request, 'samba_manager/delete_group.html', status.get())
+            self.status.set(message="Deletion canceled", success=False)
+        return self.get(request, id)
 
 
-@transaction.atomic()
-@login_required(login_url='/login/')
-def delete_share(request, id):
-    share = get_object_or_404(ManageableShare, pk=id)
+class DeleteShare(BaseDeleteView):
     status = Status()
-    status.add(item={"share": share})
+    template = "samba_manager/delete_share.html"
+    model = ManageableShare
+    element = "share"
 
-    if request.method == 'POST':
+    @transaction.atomic()
+    def post(self, request, id):
+        share = get_object_or_404(ManageableShare, pk=id)
         if request.POST.get('delete', None) == '1':
             utils.del_samba_share(share.name)
-            status.set(message="Share deleted", success=True)
+            self.status.set(message="Share deleted", success=True)
         else:
-            status.set(message="Deletion canceled", success=False)
+            self.status.set(message="Deletion canceled", success=False)
 
-        status.add(item={"shares": ManageableShare.objects.all()})
-        return render(request, "samba_manager/list_shares.html", status.get())
+        self.status.add(item={"shares": ManageableShare.objects.all()})
+        return render(request, "samba_manager/list_shares.html", self.status.get())
 
-    return render(request, 'samba_manager/delete_share.html', status.get())

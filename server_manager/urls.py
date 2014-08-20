@@ -9,7 +9,7 @@ urlpatterns = patterns(
     '',
     url(r'^/?$', login_required(CommandOverView.as_view()), name='command_overview'),
     url(r'^command_editor/?$', login_required(CommandEditor.as_view()), name='command_editor'),
-    url(r'^executor/(?P<name>\w+)/$', CommandExecutor.as_view(), name='command_executor'),
+    url(r'^executor/(?P<name>\w+)/?$', CommandExecutor.as_view(), name='command_executor'),
 
 
     url(r'^add_command/$', login_required(AddCommand.as_view()), name='add_command'),

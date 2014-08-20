@@ -15,7 +15,11 @@ USER_HOME_DIR = '/storage/arquivos/home/{0}'
 SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 ```
 
+# Config 
+To make sudo commands work in server_manager, give sudo with NOPASSWD to remote_executor.py
+
 ## IN PROGRESS
+* class based views samba
 
 * log all actions and errors to a log file through remote executor
 * Replace pam module with sudo 
@@ -37,7 +41,3 @@ SAMBA_SHARES_DIR = '/storage/arquivos/{0}'
 * Add some screenshots to docs
 * Add clean docstrings to all functions
 * Use django bootstrap for forms
-
-## LONGTERM TODO
-* replace user configuration with LDAP
-* Add LDAP admin panel
