@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.db import transaction
 from django.views.generic import View
 
-from control.utils.status import Status
+from control.utils.status import Status, SambaTotals
 from control.utils import samba_utils as utils
 from samba_manager.models import ManageableUser, ManageableGroup, ManageableShare
 from samba_manager.forms import AddChangePasswordForm, GroupForm, UserOnlyForm, SambaShareForm
@@ -20,8 +20,8 @@ class BaseSambaView(View):
 
 class IndexView(BaseSambaView):
     status = Status()
-    status.add({'text': 'This should become some wild overview page with statistics and logs and events and messages '
-                        'but for now all you got is this lousy empty page'})
+    totals = SambaTotals()
+    status.add({"totals": totals})
     template = 'samba_manager/base.html'
 
 

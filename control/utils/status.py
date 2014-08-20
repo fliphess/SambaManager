@@ -1,3 +1,6 @@
+from samba_manager.models import ManageableUser, ManageableGroup, ManageableShare
+
+
 class Status(object):
     def __init__(self):
         self.message = None
@@ -21,3 +24,14 @@ class Status(object):
 
     def add(self, item):
         self.status.update(dict(item))
+
+
+class SambaTotals(object):
+    def __init__(self):
+        self.users = ManageableUser
+        self.groups = ManageableGroup
+        self.shares = ManageableShare
+
+        self.total_users = self.users.objects.count()
+        self.total_groups = self.groups.objects.count()
+        self.total_shares = self.shares.objects.count()
