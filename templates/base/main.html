@@ -1,0 +1,17 @@
+{% extends "base/template.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="row">
+    <div class="span12">
+        <div class="hero-unit center">
+          <center>
+              <h3>You are logged in as user {{ user.username }}.</h3>
+              <a href="https://github.com/fliphess/SambaManager" target="_blank"><img src=" {% static "/static/img/samba.png" %}" width="20%" height="20%" border="0"   alt="samba"/></a>
+          </center>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
