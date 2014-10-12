@@ -1,3 +1,4 @@
+from ConfigParser import NoSectionError
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render
 from django.db import transaction
@@ -20,8 +21,7 @@ class BaseSambaView(View):
 
 class IndexView(BaseSambaView):
     status = Status()
-    totals = SambaTotals()
-    status.add({"totals": totals})
+    status.add({"totals": SambaTotals()})
     template = 'samba_manager/base.html'
 
 
@@ -134,7 +134,7 @@ class AddShare(BaseSambaView):
 class EditUser(View):
     status = Status()
     status.set(message="Update all fields to edit a user", success=True)
-    template = "samba_manager/edit_user.html"
+    template = "samba_manager/add_user.html"
 
     def get(self, request, id):
         user = get_object_or_404(ManageableUser, pk=id)
@@ -163,17 +163,24 @@ class EditUser(View):
 class EditShare(View):
     status = Status()
     status.set(message='Update all fields to edit a share', success=True)
-    template = "samba_manager/edit_share.html"
+    template = "samba_manager/add_share.html"
 
     def get(self, request, id):
         share = get_object_or_404(ManageableShare, pk=id)
         share_conf = utils.get_samba_conf()
-        groups = map(lambda x: x.lstrip('@'), share_conf.get(share.name, 'valid users').split(' '))
-        initial = {
-            'name': share.name,
-            'comment': share_conf.get(share.name, 'comment'),
-            'allowed_groups': groups,
-        }
+        try:
+            groups = map(lambda x: x.lstrip('@'), share_conf.get(share.name, 'valid users').split(' '))
+
+            initial = {
+                'name': share.name,
+                'comment': share_conf.get(share.name, 'comment'),
+                'allowed_groups': groups,
+            }
+        except NoSectionError:
+            # Insert wild error message here
+            groups = []
+            initial = {}
+
         self.status.add(item={"groups": groups, "share": share})
         self.status.add(item={"form": SambaShareForm(initial=initial)})
         return render(request, self.template, self.status.get())

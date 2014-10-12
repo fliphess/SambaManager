@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.views.generic import View
 
 
-@login_required(login_url='/login/')
-def start(request):
-    return render(request, 'auth/main.html')
+class IndexPage(View):
+    def get(self, request):
+        return render(request, 'base/main.html')
 
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import types
 import datetime
 from tempfile import NamedTemporaryFile
@@ -19,9 +18,9 @@ def run_as_root(command):
     """
 
     # Now login as root to run command
-    print 'su root -c "{0}"'.format(command)
-    process = pexpect.spawn('su root -c "{0}"'.format(command))
-    process.logfile = open('/tmp/log_', 'wa')
+    command_line = 'sudo su root -c "{0}"'.format(command)
+    process = pexpect.spawn(command_line)
+    process.logfile = open(settings.LOGFILE, 'wa')
 
     process.expect('Password: ')
     process.sendline(settings.ROOT_PASSWORD)
@@ -53,35 +52,10 @@ def change_password(username, old_password, new_password, admin=False):
 def add_user(username, password):
     user = ManageableUser.objects.filter(name=username)
     if len(user) == 0:
-        process = run_as_root('adduser --home "{home}" --force-badname {username}'.format(
+        process = run_as_root('useradd "{username}" --home "{home}"'.format(
             home=settings.USER_HOME_DIR.format(username), username=username))
-    
-        process.expect('Enter new UNIX password: ')
-        process.sendline(password)
-
-        process.expect('Retype new UNIX password: ')
-        process.sendline(password)
-
-        process.expect('\tFull Name.*')
-        process.sendline('')
-
-        process.expect('Room Number*')
-        process.sendline('')
-
-        process.expect('Work Phone*')
-        process.sendline('')
-
-        process.expect('Home Phone.*')
-        process.sendline('')
-
-        process.expect('Other*')
-        process.sendline('')
-        
-        process.expect('Is the information correct.*')
-        process.sendline('Y')
-        
         process.expect(pexpect.EOF)
-        
+
         process = run_as_root('smbpasswd -a "{0}"'.format(username))
         
         process.expect('New SMB password:')
@@ -202,17 +176,17 @@ def _save_samba_share(conf):
     
     conf.write(temp)
     temp.close()
-    bkp_date = datetime.datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')
-    process = run_as_root('cp "/etc/samba_manager/smb.conf" "/etc/samba_manager/smb.conf-{0}.bkp"'.format(bkp_date))
+    bkp_date = datetime.datetime.now().strftime('%Y%m%d_%Hh%Mm%Ss')
+    process = run_as_root('cp "/etc/samba/smb.conf" "/etc/samba/smb.conf-{0}.bkp"'.format(bkp_date))
     process.expect(pexpect.EOF)
 
-    process = run_as_root('cp "{0}" "/etc/samba_manager/smb.conf"'.format(temp.name))
+    process = run_as_root('cp "{0}" "/etc/samba/smb.conf"'.format(temp.name))
     process.expect(pexpect.EOF)
     
-    process = run_as_root('chmod 644 /etc/samba_manager/smb.conf')
+    process = run_as_root('chmod 644 /etc/samba/smb.conf')
     process.expect(pexpect.EOF)
     
-    process = run_as_root('chown root:root /etc/samba_manager/smb.conf')
+    process = run_as_root('chown root:root /etc/samba/smb.conf')
     process.expect(pexpect.EOF)
     temp.unlink(temp.name)
 
@@ -251,3 +225,5 @@ def del_samba_share(share_name):
         _save_samba_share(conf)
         ManageableShare.objects.get(name=share_name).delete()
     return True
+
+

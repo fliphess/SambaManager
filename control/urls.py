@@ -1,11 +1,14 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from django.contrib.auth.decorators import login_required
+from control.views.base import IndexPage
+
 admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    url(r'^$', 'control.views.auth.main', name='main'),
-    url(r'^start/$', 'control.views.base.start', name='start'),
+    url(r'^$', login_required(IndexPage.as_view()), name='main'),
+    url(r'^start/$', login_required(IndexPage.as_view()), name='start'),
 
     url(r'^samba_manager/', include('samba_manager.urls')),
     url(r'^server_manager/', include('server_manager.urls')),

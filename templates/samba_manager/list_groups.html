@@ -12,6 +12,7 @@
     {% include "base/alert/top.html" %}
 
     {% if groups.count %}
+     <div class="container">
      <table class="table table-hover">
       <thead>
         <tr>
@@ -28,6 +29,7 @@
       </tbody>
       {% endfor %}
     </table>
+    </div>
     <br/>
     {% endif %}
     <a class="btn btn-default" href="{% url "add_group" %}" role="button">Add Group</a>

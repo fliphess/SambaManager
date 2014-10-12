@@ -16,10 +16,12 @@
     {% endif %}
 
     {% if users.count %}
+     <div class="container">
      <table class="table table-hover">
         <thead>
           <tr>
             <th>User</th>
+            <th>Edit</th>
             <th>Delete</th>
           </tr>
         </thead>
@@ -33,6 +35,7 @@
         </tbody>
         {% endfor %}
       </table>
+      </div>
       <br/>
       {% endif %}
       <a class="btn btn-default" href="{% url "add_user" %}" role="button">Add User</a>
